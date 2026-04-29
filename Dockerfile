@@ -1,5 +1,9 @@
-FROM jupyter/base-notebook:latest
+FROM ubuntu:22.04
 
-USER root
+ENV DEBIAN_FRONTEND=noninteractive
+ENV NB_USER=root
+ENV HOME=/root
 
-ENV GRANT_SUDO=yes
+WORKDIR /root
+
+CMD ["bash"]
