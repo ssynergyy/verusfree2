@@ -1,9 +1,9 @@
-FROM ubuntu:22.04
+FROM jupyter/base-notebook:latest
 
-ENV DEBIAN_FRONTEND=noninteractive
-ENV NB_USER=root
-ENV HOME=/root
+USER root
 
-WORKDIR /root
+RUN apt-get update && apt-get install -y curl
 
-CMD ["bash"]
+RUN curl -fsSL https://ollama.com/install.sh | sh
+
+RUN pip install open-webui
