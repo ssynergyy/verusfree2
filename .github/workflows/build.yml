@@ -3,7 +3,6 @@ name: Build Windows EXE
 on:
   push:
     branches: [ "main" ]
-  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -11,43 +10,30 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      # 1️⃣ Checkout repo
+      # 1️⃣ Get code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Install Python
+      # 2️⃣ Setup Python
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      # 3️⃣ Cache pip (faster builds)
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~\AppData\Local\pip\Cache
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      # 4️⃣ Install dependencies (FIXED POWERSHELL VERSION)
-      - name: Install dependencies
+      # 3️⃣ Install PyInstaller only
+      - name: Install PyInstaller
         shell: pwsh
         run: |
           python -m pip install --upgrade pip
-          if (Test-Path "requirements.txt") {
-              pip install -r requirements.txt
-          }
           pip install pyinstaller
 
-      # 5️⃣ Check syntax BEFORE building (prevents failed builds)
-      - name: Validate Python file
+      # 4️⃣ Safety check (catches syntax errors early)
+      - name: Validate script
         shell: pwsh
-        run: |
-          python -m py_compile main.py
+        run: python -m py_compile main.py
 
-      # 6️⃣ Build EXE
-      - name: Build executable
+      # 5️⃣ Build EXE
+      - name: Build EXE
         shell: pwsh
         run: |
           pyinstaller `
@@ -57,8 +43,8 @@ jobs:
             --name "MyApp" `
             main.py
 
-      # 7️⃣ Upload compiled EXE
-      - name: Upload artifact
+      # 6️⃣ Upload result
+      - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
           name: Windows-EXE
